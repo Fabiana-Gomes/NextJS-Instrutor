@@ -2,6 +2,7 @@ const express = require('express');
 const next = require('next');
 const http = require('http');
 const { Server } = require('socket.io');
+const cors = require('cors'); // Importar o pacote cors
 
 const port = 3000;
 const dev = process.env.NODE_ENV !== 'production';
@@ -11,8 +12,21 @@ const handle = app.getRequestHandler();
 app.prepare().then(() => {
     const server = express();
     const httpServer = http.createServer(server);
-    const io = new Server(httpServer);
+    
+ // Adicionar CORS para as requisições HTTP do Express
+ server.use(cors({
+    origin: '*', // Permitir origem do cliente
+    methods: ['GET', 'POST'],
+    credentials: true
+}));
 
+const io = new Server(httpServer, {
+    cors: {
+        origin: 'http://localhost:3001', // Permitir origem do cliente (máquina do aluno)
+        methods: ['GET', 'POST'],
+        credentials: true
+    }
+});
     io.on('connection', (socket) => {
         console.log('Novo instrutor conectado'); // Log modificado
 
